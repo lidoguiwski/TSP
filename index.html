@@ -4,28 +4,26 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no" />
-  <title>Leaflet Storymap with Fixed Video & Square Map</title>
-  <link rel="icon" type="image/png" href="./favicon.png">
+  <title>Leaflet Storymap with Fixed Video</title>
+  <link rel="icon" href="favicon.png" />
 
-  <!-- Styles & Libraries -->
+  <!-- Libraries -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-providers@2.0.0/leaflet-providers.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
-  <script src="scripts/lightbox/js/lightbox.js"></script>
-  <link rel="stylesheet" href="scripts/lightbox/css/lightbox.css" />
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" />
-  <link rel="stylesheet" href="markers/leaflet.extra-markers.min.css">
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/style-desktop.css">
-  <link rel="stylesheet" href="css/loader.css">
+
+  <!-- Your CSS -->
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style-desktop.css" />
+  <link rel="stylesheet" href="css/loader.css" />
+  <link rel="stylesheet" href="markers/leaflet.extra-markers.min.css" />
 
   <style>
-    body {
+    body, html {
       margin: 0;
-      font-family: sans-serif;
-      height: 100vh;
+      height: 100%;
       overflow: hidden;
     }
 
@@ -33,11 +31,10 @@
       position: fixed;
       top: 0;
       left: 0;
-      width: 33vw;
-      height: auto;
-      aspect-ratio: 16 / 9;
+      width: 480px; /* Fixed size for video */
+      height: 270px; /* 16:9 aspect ratio */
       background: black;
-      z-index: 9999;
+      z-index: 1000;
       border-bottom: 2px solid #ccc;
       border-right: 2px solid #ccc;
     }
@@ -46,56 +43,53 @@
       width: 100%;
       height: 100%;
       border: none;
-      display: block;
     }
 
     #map {
       position: absolute;
       top: 0;
-      left: 33vw;
-      width: 67vw;
-      height: 100vh;
+      left: 0;
+      right: 0;
+      bottom: 0;
       z-index: 1;
     }
 
     .loader {
       position: absolute;
-      z-index: 1000;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
+      z-index: 9999;
     }
   </style>
 </head>
 
 <body>
-
+  <!-- Fixed YouTube Video -->
   <div id="video-fixed">
     <iframe 
       src="https://www.youtube.com/embed/LsWLRyQrGsQVgcE1?rel=0&autoplay=1&mute=1" 
-      frameborder="0" 
       allow="autoplay; encrypted-media" 
       allowfullscreen>
     </iframe>
   </div>
 
+  <!-- Map -->
   <div id="map"></div>
   <div class="loader">Loading...</div>
 
+  <!-- Scripts -->
   <script>
     const map = L.map('map', {
-      center: [40.7128, -74.0060],
+      center: [40.7128, -74.0060], // New York
       zoom: 13,
-      scrollWheelZoom: false,
       zoomControl: true,
       tap: false
     });
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
     }).addTo(map);
-
-    map.zoomControl.setPosition('topright');
   </script>
 
   <script src="google-doc-url.js"></script>
