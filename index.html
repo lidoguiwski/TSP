@@ -1,199 +1,73 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no" />
-  <title>Leaflet Storymap with Fixed Video & Square Map</title>
-  <link rel="icon" type="image/png" href="./favicon.png">
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+  <title>Leaflet Map with Timestamp-Synced Video</title>
 
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Leaflet CSS/JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet-providers@2.0.0/leaflet-providers.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
-  <script src="scripts/lightbox/js/lightbox.js"></script>
-  <link rel="stylesheet" href="scripts/lightbox/css/lightbox.css" />
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" />
-  <link rel="stylesheet" href="markers/leaflet.extra-markers.min.css">
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/style-desktop.css">
-  <link rel="stylesheet" href="css/loader.css">
 
   <style>
-    body {
-      margin: 0;
-      font-family: sans-serif;
-      height: 100vh;
-      overflow: hidden; /* Prevent body scroll */
-    }
-
-    #video-fixed {
-      position: fixed;
-      top: 0;
-      left: 0;
-      /* Width and height are now set by JavaScript */
-      background: black;
-      z-index: 9999;
-      border-bottom: 2px solid #ccc;
-      border-right: 2px solid #ccc;
-      /* Add transition for smoother resize (optional) */
-      transition: width 0.1s ease-out, height 0.1s ease-out;
-    }
-
-    #video-fixed iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: block; /* Prevents small gap below iframe */
-    }
-
-    #info-panel {
-      position: fixed;
-      /* Top and width are now set by JavaScript */
-      left: 0;
-      bottom: 0;
-      background-color: #f0f0f0;
-      z-index: 9998;
-      border-right: 2px solid #ccc;
-      overflow-y: auto; /* Add scrollbar if content overflows */
-       /* Add transition for smoother resize (optional) */
-      transition: width 0.1s ease-out, top 0.1s ease-out;
-    }
-
-    #map {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 1;
-    }
-
-    .loader {
-      position: absolute;
-      z-index: 1000;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
+    html, body { margin:0; padding:0; overflow:hidden; }
+    #container { display:flex; width:100vw; height:100vh; }
+    #left { width:50vw; background:#000; }
+    #left video { width:100%; height:auto; }
+    #map { width:50vw; height:100vh; }
   </style>
 </head>
 
 <body>
-
-  <div id="video-fixed">
-    <iframe
-      src="https://drive.google.com/file/d/1jYM4Cy6O8_eU_K39viVQDMi1a66QzbHQ/preview"
-      allow="autoplay"
-      allowfullscreen>
-    </iframe>
+<div id="container">
+  <div id="left">
+    <video id="video" controls>
+      <source src="https://drive.google.com/uc?export=download&id=1jYM4Cy6O8_eU_K39viVQDMi1a66QzbHQ" type="video/mp4">
+      Your browser doesn't support video.
+    </video>
   </div>
-
-  <div id="info-panel">
-    </div>
-
   <div id="map"></div>
+</div>
 
-  <div class="loader">Loading...</div>
+<script>
+  // Initialize the map
+  const map = L.map('map').setView([40.7128, -74.0060], 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-  <script>
-    // Basic map initialization - your storymap.js likely does more
-    var map = L.map('map', {
-      center: [0, 0],
-      zoom: 1,
-      scrollWheelZoom: false, // Keep scroll zoom off if map can be small
-      zoomControl: true,      // Good to have zoom control if map resizes
-      tap: false
+  // Timestamp-to-location mappings
+  const locations = [
+    {time: 0, coords: [40.7128, -74.0060], zoom: 14, title: "NYC"},
+    {time: 30, coords: [40.730610, -73.935242], zoom: 15, title: "Brooklyn"},
+    {time: 60, coords: [40.758896, -73.985130], zoom: 16, title: "Times Square"}
+  ];
+
+  // Add markers and interactions
+  locations.forEach(loc => {
+    const marker = L.marker(loc.coords).addTo(map)
+      .bindPopup(loc.title);
+    marker.on('click', () => {
+      video.currentTime = loc.time;
+      video.play();
     });
+  });
 
-    // Example: Add a base layer
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
+  const video = document.getElementById('video');
+  let activeIndex = -1;
 
-    // Move zoom control away from potentially overlapping sidebar/video
-    map.zoomControl.setPosition('topright');
-
-  </script>
-
-  <script src="google-doc-url.js"></script>
-  <script src="markers/leaflet.extra-markers.min.js"></script>
-  <script src="scripts/constants.js"></script>
-  <script src="scripts/jquery.csv.js"></script>
-  <script src="scripts/storymap.js"></script> <script>
-    // Get references to the elements
-    const videoFixed = document.getElementById('video-fixed');
-    const infoPanel = document.getElementById('info-panel');
-    // Note: This script assumes the 'map' variable from Leaflet is accessible in this scope.
-    // Ensure your map initialization (either inline above or in storymap.js) makes 'map' available globally or passes it.
-
-    function adjustLayout() {
-        // Exit if elements aren't found or map isn't ready yet
-        if (!videoFixed || !infoPanel || typeof map === 'undefined' || !map) {
-            console.warn("Layout adjustment skipped: Elements or map not ready.");
-            return;
+  // Synchronize map with video playback
+  video.addEventListener('timeupdate', () => {
+    const currentTime = video.currentTime;
+    for (let i = locations.length - 1; i >= 0; i--) {
+      if (currentTime >= locations[i].time) {
+        if (activeIndex !== i) {
+          activeIndex = i;
+          map.flyTo(locations[i].coords, locations[i].zoom);
         }
-
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-        const minSidebarWidth = 300; // Minimum sidebar width in px
-        const maxSidebarWidth = 600; // Maximum sidebar width in px (can adjust)
-        const videoAspectRatio = 16 / 9; // 16:9 aspect ratio
-
-        let targetSidebarWidth;
-
-        // Check if viewport is landscape and theoretically wide enough for a square map + min sidebar
-        if (viewportHeight < viewportWidth && viewportWidth > (viewportHeight + minSidebarWidth)) {
-            // Landscape: Calculate width needed for square map (Map Width = Map Height = Viewport Height)
-            targetSidebarWidth = viewportWidth - viewportHeight;
-
-            // Clamp width between min and max constraints
-            targetSidebarWidth = Math.max(minSidebarWidth, targetSidebarWidth);
-            targetSidebarWidth = Math.min(maxSidebarWidth, targetSidebarWidth);
-
-        } else {
-            // Portrait, square, or too narrow for square map: Use min width
-            // Ensure sidebar doesn't take up the entire viewport width
-            targetSidebarWidth = Math.min(minSidebarWidth, viewportWidth - 50); // Keep at least 50px for map view
-        }
-
-        // Ensure calculated width is positive
-        targetSidebarWidth = Math.max(10, targetSidebarWidth); // Smallest possible width is 10px
-
-        // Calculate dynamic video height based on aspect ratio
-        const targetVideoHeight = targetSidebarWidth / videoAspectRatio;
-
-        // Apply styles to the sidebar elements
-        videoFixed.style.width = targetSidebarWidth + 'px';
-        videoFixed.style.height = targetVideoHeight + 'px';
-
-        infoPanel.style.width = targetSidebarWidth + 'px';
-        infoPanel.style.top = targetVideoHeight + 'px'; // Position below the dynamic video height
-
-        // IMPORTANT: Tell Leaflet to update its size calculation
-        // Use a small timeout to allow the DOM to update styles before Leaflet calculates
-        setTimeout(() => {
-            map.invalidateSize();
-            // Optional: Fly map to center view if needed after resize
-            // map.flyTo(map.getCenter());
-        }, 50); // Delay in milliseconds (adjust if needed, 50-100ms is common)
+        break;
+      }
     }
-
-    // Run layout adjustment on initial load
-    // Using 'load' ensures external resources like images/iframes are considered
-    window.addEventListener('load', adjustLayout);
-
-    // Run layout adjustment on window resize, using debounce for performance
-    let resizeTimer;
-    window.addEventListener('resize', () => {
-        // Clear the previous timer
-        clearTimeout(resizeTimer);
-        // Set a new timer to run adjustLayout after a short delay
-        resizeTimer = setTimeout(adjustLayout, 150); // Delay in milliseconds
-    });
-
-  </script>
+  });
+</script>
 
 </body>
 </html>
