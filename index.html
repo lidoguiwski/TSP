@@ -14,23 +14,24 @@
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/style-desktop.css" />
-
   <style>
-    /* Responsive video inside left panel */
-    .video-wrapper {
-      position: relative;
-      width: 100%;
-      padding-bottom: 56.25%; /* 16:9 aspect ratio */
-      margin-bottom: 20px;
+    #video-container {
+      position: fixed;
+      top: 80px;
+      left: 10px;
+      width: 360px;
+      height: 202px;
+      z-index: 1001;
+      background: black;
     }
 
-    .video-wrapper iframe {
-      position: absolute;
-      top: 0;
-      left: 0;
+    #video-container iframe {
       width: 100%;
       height: 100%;
-      border: none;
+    }
+
+    #narration {
+      margin-top: 300px;
     }
   </style>
 </head>
@@ -42,23 +43,19 @@
     <div id="header"></div>
   </div>
 
+  <!-- Video container -->
+  <div id="video-container">
+    <iframe id="video-frame" src="https://drive.google.com/file/d/1jYM4Cy6O8_eU_K39viVQDMi1a66QzbHQ/preview" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  </div>
+
+  <!-- Narration container -->
   <div id="narration">
     <div id="contents">
-      <!-- 🎥 Responsive video embedded directly inside left panel -->
-      <div class="video-wrapper">
-        <iframe
-          id="video-frame"
-          src="https://drive.google.com/file/d/1jYM4Cy6O8_eU_K39viVQDMi1a66QzbHQ/preview"
-          allow="autoplay; encrypted-media"
-          allowfullscreen>
-        </iframe>
-      </div>
-
-      <!-- Original content continues -->
       <div id="top"></div>
     </div>
   </div>
 
+  <!-- Map and loader -->
   <div class="loader">Loading...</div>
   <div id="map"></div>
 
@@ -69,4 +66,5 @@
   <script src="scripts/storymap.js"></script>
 
 </body>
+
 </html>
