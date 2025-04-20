@@ -398,4 +398,6 @@ $(window).on('load', function() {
         player = new YT.Player('video-fixed', {
             height: '100%',
             width: '100%',
-            videoId: 'LsWLRyQrGsQVgcE1', // <---------------------- YOUR YOUTUBE VIDEO ID
+            videoId: '2', // <---------------------- YOUR YOUTUBE VIDEO ID HERE
+            playerVars: {
+                'playsinline': 1 // Important for mobile
