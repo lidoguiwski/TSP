@@ -4,10 +4,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no" />
-  <title>Leaflet Storymap with Responsive Square Map</title>
+  <title>Leaflet Storymap with Square Map</title>
   <link rel="icon" type="image/png" href="./favicon.png">
 
-  <!-- Leaflet and style dependencies -->
+  <!-- Leaflet and dependencies -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-providers@2.0.0/leaflet-providers.js"></script>
@@ -16,18 +16,19 @@
   <script src="scripts/lightbox/js/lightbox.js"></script>
   <link rel="stylesheet" href="scripts/lightbox/css/lightbox.css" />
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" />
-  <link rel="stylesheet" href="markers/leaflet.extra-markers.min.css">
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/style-desktop.css">
-  <link rel="stylesheet" href="css/loader.css">
+  <link rel="stylesheet" href="markers/leaflet.extra-markers.min.css" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style-desktop.css" />
+  <link rel="stylesheet" href="css/loader.css" />
 
   <style>
     html, body {
       margin: 0;
       padding: 0;
-      overflow: hidden;
       height: 100vh;
       width: 100vw;
+      overflow: hidden;
+      font-family: sans-serif;
     }
 
     #container {
@@ -37,8 +38,10 @@
     }
 
     #left-panel {
-      background: black;
-      position: relative;
+      background-color: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     #left-panel iframe {
@@ -48,7 +51,7 @@
     }
 
     #map {
-      height: 100vh;
+      background: #eee;
     }
 
     .loader {
@@ -62,7 +65,6 @@
 </head>
 
 <body>
-
   <div id="container">
     <div id="left-panel">
       <iframe
@@ -77,21 +79,35 @@
   <div class="loader">Loading...</div>
 
   <script>
-    function resizePanels() {
-      const height = window.innerHeight;
-      const width = window.innerWidth;
-      const mapSize = height; // square map
-      const leftPanel = document.getElementById('left-panel');
+    let map;
+
+    function resizeLayout() {
+      const container = document.getElementById('container');
+      const left = document.getElementById('left-panel');
       const mapDiv = document.getElementById('map');
 
-      leftPanel.style.width = `${width - mapSize}px`;
-      mapDiv.style.width = `${mapSize}px`;
+      const height = window.innerHeight;
+      const width = window.innerWidth;
+      const mapSize = Math.min(height, width); // keep map square based on viewport height
+      const leftPanelWidth = width - mapSize;
+
+      left.style.width = leftPanelWidth + 'px';
+      left.style.height = height + 'px';
+
+      mapDiv.style.width = mapSize + 'px';
+      mapDiv.style.height = height + 'px';
+
+      if (map) {
+        map.invalidateSize();
+      }
     }
 
-    window.addEventListener('resize', resizePanels);
+    window.addEventListener('resize', resizeLayout);
+
     window.addEventListener('load', () => {
-      resizePanels();
-      L.map('map', {
+      resizeLayout();
+
+      map = L.map('map', {
         center: [0, 0],
         zoom: 1,
         scrollWheelZoom: false,
@@ -101,6 +117,7 @@
     });
   </script>
 
+  <!-- Other scripts -->
   <script src="google-doc-url.js"></script>
   <script src="markers/leaflet.extra-markers.min.js"></script>
   <script src="scripts/constants.js"></script>
