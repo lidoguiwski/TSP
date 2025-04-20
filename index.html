@@ -25,7 +25,7 @@
       margin: 0;
       font-family: sans-serif;
       height: 100vh;
-      overflow: hidden;
+      overflow: hidden; /* Prevent body scroll */
     }
 
     #video-fixed {
@@ -46,20 +46,21 @@
       border: none;
     }
 
-    /* --- NEW PANEL STYLE --- */
+    /* --- UPDATED PANEL STYLE --- */
     #info-panel {
-      position: fixed;
-      top: 225px; /* Positioned below the video (video height) */
-      left: 0;
-      width: 400px; /* Same width as the video */
-      height: 150px; /* Adjust height as needed */
-      background-color: #f0f0f0; /* Light gray background to see it */
-      z-index: 9998; /* Below video, above map */
-      border-right: 2px solid #ccc; /* Optional: matching border */
-      border-bottom: 2px solid #ccc; /* Optional: matching border */
-      /* Add 'overflow: auto;' if you plan to put content that might exceed the height */
+        position: fixed;
+        top: 225px; /* Positioned below the video (video height) */
+        left: 0;
+        bottom: 0; /* Stretch panel to the bottom of the viewport */
+        width: 400px; /* Same width as the video */
+        /* Height is now determined by top/bottom */
+        background-color: #f0f0f0; /* Light gray background to see it */
+        z-index: 9998; /* Below video, above map */
+        border-right: 2px solid #ccc; /* Optional: matching border */
+        /* Removed bottom border */
+        overflow-y: auto; /* Add vertical scrollbar IF content overflows */
     }
-    /* --- END NEW PANEL STYLE --- */
+    /* --- END UPDATED PANEL STYLE --- */
 
 
     #map {
@@ -93,6 +94,8 @@
 
   <div id="info-panel">
     </div>
+
+
   <div id="map"></div>
 
   <div class="loader">Loading...</div>
