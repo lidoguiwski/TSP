@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" href="./favicon.png">
   <title>Leaflet Storymaps with Google Sheets Template</title>
 
-  <!-- Load Leaflet CSS and JS-->
+  <!-- Load Leaflet CSS and JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
@@ -16,7 +16,7 @@
   <!-- Load Leaflet basemap providers -->
   <script src="https://unpkg.com/leaflet-providers@2.0.0/leaflet-providers.js"></script>
 
-  <!-- Load jQuery  -->
+  <!-- Load jQuery -->
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
 
   <!-- Load PapaParse -->
@@ -44,6 +44,18 @@
   <div id="narration">
     <div id="contents">
       <div id="top"></div>
+
+      <!-- Embedded Video Container -->
+      <div id="video-container" style="width: 100%; max-width: 720px; margin: 20px auto;">
+        <iframe
+          src="https://drive.google.com/file/d/1jYM4Cy6O8_eU_K39viVQDMi1a66QzbHQ/preview"
+          width="100%"
+          height="405"
+          allow="autoplay"
+          allowfullscreen>
+        </iframe>
+      </div>
+
     </div>
   </div>
 
@@ -60,17 +72,6 @@
       tap: false
     });
   </script>
-
-  <div id="video-container" style="width: 100%; max-width: 720px; margin: 20px auto;">
-  <iframe
-    src="https://drive.google.com/file/d/1jYM4Cy6O8_eU_K39viVQDMi1a66QzbHQ/preview"
-    width="100%"
-    height="405"
-    allow="autoplay"
-    allowfullscreen>
-  </iframe>
-</div>
-
 
   <script type="text/javascript" src="google-doc-url.js"></script>
   <script type="text/javascript" src="markers/leaflet.extra-markers.min.js"></script>
