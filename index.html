@@ -1,108 +1,349 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
+
 <html>
+
+
+
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no" />
-  <title>Video Storymap: NYC Tour</title>
-  <link rel="icon" type="image/png" href="./favicon.png" />
 
-  <!-- Libraries -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet-providers@2.0.0/leaflet-providers.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
-  <script src="https://www.youtube.com/iframe_api"></script>
+  <meta charset="utf-8" />
 
-  <!-- Styles -->
-  <link rel="stylesheet" href="scripts/lightbox/css/lightbox.css" />
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" />
-  <link rel="stylesheet" href="markers/leaflet.extra-markers.min.css" />
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/style-desktop.css" />
-  <link rel="stylesheet" href="css/loader.css" />
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no" />
 
-  <style>
-    body {
-      margin: 0;
-      font-family: sans-serif;
-      height: 100vh;
-      overflow: hidden;
-      display: flex;
-    }
+  <title>Leaflet Storymap with Fixed Video & Square Map</title>
 
-    #left-panel {
-      width: 40vw;
-      display: flex;
-      flex-direction: column;
-      background: #111;
-    }
+  <link rel="icon" type="image/png" href="./favicon.png">
 
-    #video-fixed {
-      width: 100%;
-      aspect-ratio: 16/9;
-      background: black;
-      z-index: 1000;
-      border-bottom: 2px solid #ccc;
-    }
 
-    #video-fixed iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
 
-    #map {
-      flex-grow: 1;
-      width: 60vw;
-      height: 100vh;
-    }
+  <!-- Libraries -->
 
-    #info-panel {
-      flex-grow: 1;
-      background-color: #f0f0f0;
-      overflow-y: auto;
-      overflow-x: hidden;
-      padding: 10px;
-    }
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-    .chapter-container {
-      padding: 10px 15px;
-      margin-bottom: 10px;
-      border-bottom: 1px solid #eee;
-    }
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    .chapter-container.in-focus {
-      background-color: #ffefc4;
-    }
+  <script src="https://unpkg.com/leaflet-providers@2.0.0/leaflet-providers.js"></script>
 
-    .marker-active .extra-marker {
-      background-color: orange !important;
-    }
-  </style>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
+
+  <script src="scripts/lightbox/js/lightbox.js"></script>
+
+  <link rel="stylesheet" href="scripts/lightbox/css/lightbox.css" />
+
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" />
+
+  <link rel="stylesheet" href="markers/leaflet.extra-markers.min.css">
+
+  <link rel="stylesheet" href="css/style.css">
+
+  <link rel="stylesheet" href="css/style-desktop.css">
+
+  <link rel="stylesheet" href="css/loader.css">
+
+
+
+  <!-- Video + Layout Styling -->
+
+  <style>
+
+    body {
+
+      margin: 0;
+
+      font-family: sans-serif;
+
+      height: 100vh;
+
+      overflow: hidden;
+
+    }
+
+
+
+    #video-fixed {
+
+      position: fixed;
+
+      top: 0;
+
+      left: 0;
+
+      background: black;
+
+      z-index: 9999;
+
+      border-bottom: 2px solid #ccc;
+
+      border-right: 2px solid #ccc;
+
+      transition: width 0.1s ease-out, height 0.1s ease-out;
+
+    }
+
+
+
+    #video-fixed iframe {
+
+      width: 100%;
+
+      height: 100%;
+
+      border: none;
+
+      display: block;
+
+    }
+
+
+
+    #info-panel {
+
+      position: fixed;
+
+      left: 0;
+
+      bottom: 0;
+
+      background-color: #f0f0f0;
+
+      z-index: 9998;
+
+      border-right: 2px solid #ccc;
+
+      overflow-y: auto;
+
+      transition: width 0.1s ease-out, top 0.1s ease-out;
+
+    }
+
+
+
+    #map {
+
+      position: absolute;
+
+      top: 0;
+
+      left: 0;
+
+      width: 100%;
+
+      height: 100%;
+
+      z-index: 1;
+
+    }
+
+
+
+    .loader {
+
+      position: absolute;
+
+      z-index: 1000;
+
+      top: 50%;
+
+      left: 50%;
+
+      transform: translate(-50%, -50%);
+
+    }
+
+  </style>
+
 </head>
 
-<body>
-  <div id="left-panel">
-    <div id="video-fixed">
-      <iframe id="ytplayer"
-              src="https://www.youtube.com/embed/8HKlDSlDx_w?enablejsapi=1&mute=1&playsinline=1"
-              frameborder="0"
-              allow="autoplay; encrypted-media"
-              allowfullscreen></iframe>
-    </div>
-    <div id="info-panel">
-      <!-- Chapters will appear here -->
-    </div>
-  </div>
-  <div id="map"></div>
 
-  <!-- JavaScript (in this order) -->
-  <script src="google-doc-url.js"></script>
-  <script src="scripts/lightbox/js/lightbox.js"></script>
-  <script src="markers/leaflet.extra-markers.min.js"></script>
-  <script src="scripts/constants.js"></script>
-  <script src="scripts/jquery.csv.js"></script>
-  <script src="scripts/storymap.js"></script>
+
+<body>
+
+
+
+  <!-- YouTube Video -->
+
+  <div id="video-fixed">
+
+  <iframe
+
+  id="ytplayer"
+
+  width="100%"
+
+  height="100%"
+
+  src="https://www.youtube.com/embed/8HKlDSlDx_w?autoplay=1&mute=1"
+
+
+
+  frameborder="0"
+
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+
+  allowfullscreen>
+
+</iframe>
+
+
+
+  </div>
+
+
+
+  <!-- Info Panel Placeholder -->
+
+  <div id="info-panel"></div>
+
+
+
+  <!-- Map -->
+
+  <div id="map"></div>
+
+
+
+  <!-- Loading spinner -->
+
+  <div class="loader">Loading...</div>
+
+
+
+  <!-- Leaflet Init -->
+
+  <script>
+
+    var map = L.map('map', {
+
+      center: [0, 0],
+
+      zoom: 1,
+
+      scrollWheelZoom: false,
+
+      zoomControl: true,
+
+      tap: false
+
+    });
+
+
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+
+    }).addTo(map);
+
+
+
+    map.zoomControl.setPosition('topright');
+
+  </script>
+
+
+
+  <!-- Storymap Scripts -->
+
+  <script src="google-doc-url.js"></script>
+
+  <script src="markers/leaflet.extra-markers.min.js"></script>
+
+  <script src="scripts/constants.js"></script>
+
+  <script src="scripts/jquery.csv.js"></script>
+
+  <script src="scripts/storymap.js"></script>
+
+
+
+  <!-- Dynamic Layout Adjustment -->
+
+  <script>
+
+    const videoFixed = document.getElementById('video-fixed');
+
+    const infoPanel = document.getElementById('info-panel');
+
+
+
+    function adjustLayout() {
+
+      if (!videoFixed || !infoPanel || typeof map === 'undefined') return;
+
+
+
+      const viewportWidth = window.innerWidth;
+
+      const viewportHeight = window.innerHeight;
+
+      const minSidebarWidth = 300;
+
+      const maxSidebarWidth = 600;
+
+      const videoAspectRatio = 16 / 9;
+
+
+
+      let targetSidebarWidth;
+
+
+
+      if (viewportHeight < viewportWidth && viewportWidth > (viewportHeight + minSidebarWidth)) {
+
+        targetSidebarWidth = viewportWidth - viewportHeight;
+
+        targetSidebarWidth = Math.max(minSidebarWidth, Math.min(maxSidebarWidth, targetSidebarWidth));
+
+      } else {
+
+        targetSidebarWidth = Math.min(minSidebarWidth, viewportWidth - 50);
+
+      }
+
+
+
+      targetSidebarWidth = Math.max(10, targetSidebarWidth);
+
+      const targetVideoHeight = targetSidebarWidth / videoAspectRatio;
+
+
+
+      videoFixed.style.width = targetSidebarWidth + 'px';
+
+      videoFixed.style.height = targetVideoHeight + 'px';
+
+      infoPanel.style.width = targetSidebarWidth + 'px';
+
+      infoPanel.style.top = targetVideoHeight + 'px';
+
+
+
+      setTimeout(() => {
+
+        map.invalidateSize();
+
+      }, 50);
+
+    }
+
+
+
+    window.addEventListener('load', adjustLayout);
+
+    window.addEventListener('resize', () => {
+
+      clearTimeout(window._resizeTimer);
+
+      window._resizeTimer = setTimeout(adjustLayout, 150);
+
+    });
+
+  </script>
+
+
+
 </body>
+
 </html>
