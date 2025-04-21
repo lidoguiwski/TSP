@@ -21,6 +21,9 @@
   <link rel="stylesheet" href="css/style-desktop.css">
   <link rel="stylesheet" href="css/loader.css">
 
+  <!-- YouTube API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
+
   <!-- Video + Layout Styling -->
   <style>
     body {
@@ -41,11 +44,9 @@
       transition: width 0.1s ease-out, height 0.1s ease-out;
     }
 
-    #video-fixed iframe {
+    #ytplayer {
       width: 100%;
       height: 100%;
-      border: none;
-      display: block;
     }
 
     #info-panel {
@@ -80,18 +81,9 @@
 
 <body>
 
-  <!-- YouTube Video -->
+  <!-- YouTube Player -->
   <div id="video-fixed">
-  <iframe
-  id="ytplayer"
-  width="100%"
-  height="100%"
-  src="https://www.youtube.com/embed/8HKlDSlDx_w?autoplay=1?mute=1"
-  frameborder="0"
-  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-  allowfullscreen>
-</iframe>
-
+    <div id="ytplayer"></div>
   </div>
 
   <!-- Info Panel Placeholder -->
@@ -114,7 +106,7 @@
     });
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
     map.zoomControl.setPosition('topright');
@@ -168,6 +160,50 @@
       clearTimeout(window._resizeTimer);
       window._resizeTimer = setTimeout(adjustLayout, 150);
     });
+  </script>
+
+  <!-- YouTube Sync Logic -->
+  <script>
+    let player;
+    let chapterTimestamps = [];
+    let lastTimeMarker = null;
+
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('ytplayer', {
+        videoId: '8HKlDSlDx_w', // your video ID
+        playerVars: {
+          autoplay: 1,
+          mute: 0,
+          controls: 1,
+          rel: 0
+        },
+        events: {
+          'onReady': () => setInterval(syncMapToVideo, 1000)
+        }
+      });
+    }
+
+    function convertTimeToSeconds(t) {
+      if (!t || typeof t !== 'string') return null;
+      const parts = t.split(':');
+      return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+    }
+
+    function syncMapToVideo() {
+      if (!player || !player.getCurrentTime) return;
+      const currentTime = Math.floor(player.getCurrentTime());
+
+      if (currentTime === lastTimeMarker) return;
+      lastTimeMarker = currentTime;
+
+      for (let i = chapterTimestamps.length - 1; i >= 0; i--) {
+        const c = chapterTimestamps[i];
+        if (c.time <= currentTime) {
+          map.flyTo([c.lat, c.lng], c.zoom);
+          break;
+        }
+      }
+    }
   </script>
 
 </body>
