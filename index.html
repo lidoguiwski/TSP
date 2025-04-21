@@ -4,8 +4,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no" />
-  <title>Leaflet Storymap with Fixed Video & Square Map</title>
-  <link rel="icon" type="image/png" href="./favicon.png">
+  <title>Leaflet Storymap with Synced YouTube</title>
+  <link rel="icon" type="image/png" href="./favicon.png" />
 
   <!-- Libraries -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -16,15 +16,14 @@
   <script src="scripts/lightbox/js/lightbox.js"></script>
   <link rel="stylesheet" href="scripts/lightbox/css/lightbox.css" />
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" />
-  <link rel="stylesheet" href="markers/leaflet.extra-markers.min.css">
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/style-desktop.css">
-  <link rel="stylesheet" href="css/loader.css">
+  <link rel="stylesheet" href="markers/leaflet.extra-markers.min.css" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style-desktop.css" />
+  <link rel="stylesheet" href="css/loader.css" />
 
-  <!-- YouTube API -->
+  <!-- YouTube Iframe API -->
   <script src="https://www.youtube.com/iframe_api"></script>
 
-  <!-- Video + Layout Styling -->
   <style>
     body {
       margin: 0;
@@ -81,21 +80,21 @@
 
 <body>
 
-  <!-- YouTube Player -->
+  <!-- Video Container (loaded by YouTube API) -->
   <div id="video-fixed">
     <div id="ytplayer"></div>
   </div>
 
-  <!-- Info Panel Placeholder -->
+  <!-- Info Panel -->
   <div id="info-panel"></div>
 
   <!-- Map -->
   <div id="map"></div>
 
-  <!-- Loading spinner -->
+  <!-- Loader -->
   <div class="loader">Loading...</div>
 
-  <!-- Leaflet Init -->
+  <!-- Map Initialization -->
   <script>
     var map = L.map('map', {
       center: [0, 0],
@@ -112,14 +111,14 @@
     map.zoomControl.setPosition('topright');
   </script>
 
-  <!-- Storymap Scripts -->
+  <!-- Storymap Dependencies -->
   <script src="google-doc-url.js"></script>
   <script src="markers/leaflet.extra-markers.min.js"></script>
   <script src="scripts/constants.js"></script>
   <script src="scripts/jquery.csv.js"></script>
   <script src="scripts/storymap.js"></script>
 
-  <!-- Dynamic Layout Adjustment -->
+  <!-- Layout Adjustments -->
   <script>
     const videoFixed = document.getElementById('video-fixed');
     const infoPanel = document.getElementById('info-panel');
@@ -162,7 +161,7 @@
     });
   </script>
 
-  <!-- YouTube Sync Logic -->
+  <!-- YouTube Player + Timestamp Sync -->
   <script>
     let player;
     let chapterTimestamps = [];
@@ -170,15 +169,17 @@
 
     function onYouTubeIframeAPIReady() {
       player = new YT.Player('ytplayer', {
-        videoId: '8HKlDSlDx_w', // your video ID
+        videoId: '8HKlDSlDx_w', // Replace with your own video ID
         playerVars: {
           autoplay: 1,
-          mute: 0,
+          mute: 1,        // Mute required for autoplay without user gesture
           controls: 1,
           rel: 0
         },
         events: {
-          'onReady': () => setInterval(syncMapToVideo, 1000)
+          'onReady': () => {
+            setInterval(syncMapToVideo, 1000);
+          }
         }
       });
     }
@@ -192,7 +193,6 @@
     function syncMapToVideo() {
       if (!player || !player.getCurrentTime) return;
       const currentTime = Math.floor(player.getCurrentTime());
-
       if (currentTime === lastTimeMarker) return;
       lastTimeMarker = currentTime;
 
