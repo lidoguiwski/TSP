@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no" />
-  <title>Leaflet Storymap with Synced YouTube</title>
+  <title>Leaflet Storymap with Fixed Video & Square Map</title>
   <link rel="icon" type="image/png" href="./favicon.png">
 
-  <!-- Dependencies -->
+  <!-- Libraries -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-providers@2.0.0/leaflet-providers.js"></script>
@@ -14,11 +15,13 @@
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
   <script src="scripts/lightbox/js/lightbox.js"></script>
   <link rel="stylesheet" href="scripts/lightbox/css/lightbox.css" />
-  <link rel="stylesheet" href="markers/leaflet.extra-markers.min.css" />
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/style-desktop.css" />
-  <link rel="stylesheet" href="css/loader.css" />
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" />
+  <link rel="stylesheet" href="markers/leaflet.extra-markers.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style-desktop.css">
+  <link rel="stylesheet" href="css/loader.css">
 
+  <!-- Video + Layout Styling -->
   <style>
     body {
       margin: 0;
@@ -76,23 +79,31 @@
 </head>
 
 <body>
-  <!-- YouTube Player (Autoplays and Mutes) -->
+
+  <!-- YouTube Video -->
   <div id="video-fixed">
-    <iframe
-      id="ytplayer"
-      src="https://www.youtube.com/embed/8HKlDSlDx_w?autoplay=1&mute=1"
-      frameborder="0"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-      allowfullscreen>
-    </iframe>
+  <iframe
+  id="ytplayer"
+  width="100%"
+  height="100%"
+  src="https://www.youtube.com/embed/8HKlDSlDx_w?autoplay=1"
+  frameborder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowfullscreen>
+</iframe>
+
   </div>
 
-  <!-- Map UI -->
+  <!-- Info Panel Placeholder -->
   <div id="info-panel"></div>
+
+  <!-- Map -->
   <div id="map"></div>
+
+  <!-- Loading spinner -->
   <div class="loader">Loading...</div>
 
-  <!-- Leaflet Setup -->
+  <!-- Leaflet Init -->
   <script>
     var map = L.map('map', {
       center: [0, 0],
@@ -103,23 +114,20 @@
     });
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
     map.zoomControl.setPosition('topright');
   </script>
-
-  <!-- YouTube API Loader -->
-  <script src="https://www.youtube.com/iframe_api"></script>
 
   <!-- Storymap Scripts -->
   <script src="google-doc-url.js"></script>
   <script src="markers/leaflet.extra-markers.min.js"></script>
   <script src="scripts/constants.js"></script>
   <script src="scripts/jquery.csv.js"></script>
-  <script src="storymap.updated.js"></script>
+  <script src="scripts/storymap.js"></script>
 
-  <!-- Layout Logic -->
+  <!-- Dynamic Layout Adjustment -->
   <script>
     const videoFixed = document.getElementById('video-fixed');
     const infoPanel = document.getElementById('info-panel');
@@ -133,9 +141,14 @@
       const maxSidebarWidth = 600;
       const videoAspectRatio = 16 / 9;
 
-      let targetSidebarWidth = viewportWidth > (viewportHeight + minSidebarWidth)
-        ? Math.min(Math.max(viewportWidth - viewportHeight, minSidebarWidth), maxSidebarWidth)
-        : Math.min(minSidebarWidth, viewportWidth - 50);
+      let targetSidebarWidth;
+
+      if (viewportHeight < viewportWidth && viewportWidth > (viewportHeight + minSidebarWidth)) {
+        targetSidebarWidth = viewportWidth - viewportHeight;
+        targetSidebarWidth = Math.max(minSidebarWidth, Math.min(maxSidebarWidth, targetSidebarWidth));
+      } else {
+        targetSidebarWidth = Math.min(minSidebarWidth, viewportWidth - 50);
+      }
 
       targetSidebarWidth = Math.max(10, targetSidebarWidth);
       const targetVideoHeight = targetSidebarWidth / videoAspectRatio;
@@ -145,7 +158,9 @@
       infoPanel.style.width = targetSidebarWidth + 'px';
       infoPanel.style.top = targetVideoHeight + 'px';
 
-      setTimeout(() => map.invalidateSize(), 50);
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 50);
     }
 
     window.addEventListener('load', adjustLayout);
@@ -154,5 +169,6 @@
       window._resizeTimer = setTimeout(adjustLayout, 150);
     });
   </script>
+
 </body>
 </html>
