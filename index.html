@@ -1,265 +1,110 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no" />
   <title>Video Storymap: NYC Tour</title>
-  <link rel="icon" type="image/png" href="./favicon.png">
+  <link rel="icon" type="image/png" href="./favicon.png" />
 
+  <!-- Libraries -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-providers@2.0.0/leaflet-providers.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
-  <script src="scripts/lightbox/js/lightbox.js"></script>
+
+  <!-- YouTube Player API (needed!) -->
+  <script src="https://www.youtube.com/iframe_api"></script>
+
+  <!-- Styles -->
   <link rel="stylesheet" href="scripts/lightbox/css/lightbox.css" />
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" />
-  <link rel="stylesheet" href="markers/leaflet.extra-markers.min.css">
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/style-desktop.css">
-  <link rel="stylesheet" href="css/loader.css">
-  <style>
-    .marker-active .extra-marker {
-       background-color: orange !important; /* Or another highlight color */
-    }
-  </style>
+  <link rel="stylesheet" href="markers/leaflet.extra-markers.min.css" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style-desktop.css" />
+  <link rel="stylesheet" href="css/loader.css" />
 
   <style>
     body {
       margin: 0;
       font-family: sans-serif;
       height: 100vh;
-      /* Prevent body scroll, scrolling happens in #info-panel */
       overflow: hidden;
+      display: flex;
+    }
+
+    #left-panel {
+      width: 40vw;
+      display: flex;
+      flex-direction: column;
+      background: #111;
     }
 
     #video-fixed {
-      position: fixed;
-      top: 0;
-      left: 0;
+      width: 100%;
+      aspect-ratio: 16/9;
       background: black;
-      z-index: 1000; /* Ensure video is above map but potentially below modals */
+      z-index: 1000;
       border-bottom: 2px solid #ccc;
-      border-right: 2px solid #ccc;
-      /* Smooth transitions for resize */
-      transition: width 0.1s ease-out, height 0.1s ease-out;
-      /* Visibility is controlled by JS after load */
-      visibility: hidden;
     }
 
     #video-fixed iframe {
       width: 100%;
       height: 100%;
       border: none;
-      display: block;
+    }
+
+    #map {
+      flex-grow: 1;
+      width: 60vw;
+      height: 100vh;
     }
 
     #info-panel {
-      position: fixed;
-      left: 0;
-      bottom: 0; /* Anchored to bottom */
-      background-color: #f0f0f0; /* Default, can be overridden by JS */
-      z-index: 999; /* Below video, above map */
-      border-right: 2px solid #ccc;
-      overflow-y: auto; /* Enable vertical scrolling */
-      overflow-x: hidden; /* Prevent horizontal scrolling */
-      /* Transition for smooth resize adjustments */
-      transition: width 0.1s ease-out, top 0.1s ease-out;
-      /* Visibility is controlled by JS after load */
-       visibility: hidden;
-       /* Ensure content flows below the fixed video */
-       padding-bottom: 10px; /* Add some padding at the bottom */
+      flex-grow: 1;
+      background-color: #f0f0f0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 10px;
     }
 
-    /* Style for chapter containers inside info-panel */
     .chapter-container {
-        padding: 10px 15px;
-        margin-bottom: 10px; /* Spacing between chapters */
-        border-bottom: 1px solid #eee;
-        transition: background-color 0.3s ease;
+      padding: 10px 15px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #eee;
     }
+
     .chapter-container.in-focus {
-        background-color: #e9e9e9; /* Highlight color, can be overridden */
-    }
-    .chapter-header {
-        font-size: 1.2em;
-        font-weight: bold;
-        margin-bottom: 10px;
-    }
-    .description {
-        font-size: 0.95em;
-        line-height: 1.5;
-        margin-top: 10px;
-    }
-    .media-container {
-        margin: 10px 0;
-    }
-    .media-container img {
-        max-width: 100%;
-        height: auto;
-        display: block;
-    }
-    .source {
-        display: block;
-        font-size: 0.8em;
-        color: #666;
-        margin-top: 5px;
+      background-color: #ffefc4;
     }
 
-
-    #map {
-      position: absolute;
-      top: 0;
-      left: 0; /* Will be adjusted by layout script */
-      right: 0;
-      bottom: 0; /* Cover the whole viewport initially */
-      width: 100%;
-      height: 100%;
-      z-index: 1; /* Base layer */
-       /* Visibility is controlled by JS after load */
-       visibility: hidden;
-    }
-
-    .loader {
-      position: absolute;
-      z-index: 10000; /* Above everything */
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      /* Basic styling for loader text */
-      padding: 20px;
-      background: rgba(255, 255, 255, 0.8);
-      border-radius: 5px;
+    .marker-active .extra-marker {
+      background-color: orange !important;
     }
   </style>
 </head>
 
 <body>
-
-  <div id="video-fixed">
-    <iframe
-      id="ytplayer"
-      width="100%"
-      height="100%"
-      src="https://www.youtube.com/embed/8HKlDSlDx_w?enablejsapi=1"
-      frameborder="0"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-      allowfullscreen>
-    </iframe>
+  <div id="left-panel">
+    <div id="video-fixed">
+      <!-- Set your YouTube video ID here -->
+      <iframe id="ytplayer"
+              src="https://www.youtube.com/embed/LsWLRyQrGsQVgcE1?enablejsapi=1&mute=1&playsinline=1"
+              frameborder="0"
+              allow="autoplay; encrypted-media"
+              allowfullscreen></iframe>
     </div>
-
-  <div id="info-panel">
-      </div>
-
+    <div id="info-panel">
+      <!-- Chapters will be loaded here -->
+    </div>
+  </div>
   <div id="map"></div>
 
-  <div class="loader">Loading Storymap...</div>
-
-  <script>
-    // Initialize map object globally so storymap.js can access it
-    var map = L.map('map', {
-      center: [40.7128, -74.0060], // Default center (e.g., NYC)
-      zoom: 12,                   // Default zoom
-      scrollWheelZoom: true,      // Enable scroll wheel zoom
-      zoomControl: false,         // Disable default zoom control (added by storymap.js options)
-      tap: true                 // Enable tap interaction on mobile
-    });
-
-    // Note: Base layer is added in storymap.js based on options
-    // L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    //  attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    // }).addTo(map);
-
-    // Zoom control position is handled in storymap.js
-    // map.zoomControl.setPosition('topright');
-  </script>
-
-  <script src="https://www.youtube.com/iframe_api"></script>
-  <script src="google-doc-url.js"></script>
+  <!-- Scripts -->
+  <script src="scripts/lightbox/js/lightbox.js"></script>
   <script src="markers/leaflet.extra-markers.min.js"></script>
   <script src="scripts/constants.js"></script>
+  <script src="scripts/jquery.csv.js"></script>
   <script src="scripts/storymap.js"></script>
-  <script>
-      lightbox.option({
-          'resizeDuration': 200,
-          'wrapAround': true
-      })
-  </script>
-
-
-  <script>
-    const videoFixed = document.getElementById('video-fixed');
-    const infoPanel = document.getElementById('info-panel');
-    const mapElement = document.getElementById('map'); // Get map element reference
-
-    function adjustLayout() {
-      // Ensure elements exist and map object is ready
-      if (!videoFixed || !infoPanel || !mapElement || typeof map === 'undefined') return;
-
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-      const minSidebarWidth = 300; // Minimum width for video/info panel
-      const maxSidebarWidth = 600; // Maximum width for video/info panel
-      const videoAspectRatio = 16 / 9;
-
-      let targetSidebarWidth;
-
-      // Determine sidebar width based on aspect ratio and available space
-      // Prioritize making map square-ish if possible in landscape
-      if (viewportWidth > viewportHeight && viewportWidth > (viewportHeight + minSidebarWidth)) {
-         // Landscape: Try making map width = viewport height
-         targetSidebarWidth = viewportWidth - viewportHeight;
-         targetSidebarWidth = Math.max(minSidebarWidth, Math.min(maxSidebarWidth, targetSidebarWidth));
-      } else {
-         // Portrait or near-square: Use a fraction of width or min width
-         targetSidebarWidth = Math.min(Math.max(minSidebarWidth, viewportWidth * 0.4), maxSidebarWidth); // e.g., 40% of width
-         targetSidebarWidth = Math.max(10, targetSidebarWidth); // Ensure minimum > 0
-      }
-
-      // Calculate video height based on sidebar width and aspect ratio
-      const targetVideoHeight = targetSidebarWidth / videoAspectRatio;
-
-      // Apply styles to position and size elements
-      videoFixed.style.width = targetSidebarWidth + 'px';
-      videoFixed.style.height = targetVideoHeight + 'px';
-
-      infoPanel.style.width = targetSidebarWidth + 'px';
-      // Position info panel below the video
-      infoPanel.style.top = targetVideoHeight + 'px';
-      // Height should fill remaining space down to the bottom
-      infoPanel.style.height = `calc(100vh - ${targetVideoHeight}px)`;
-      infoPanel.style.bottom = '0'; // Explicitly set bottom to 0
-
-      // Adjust map container position and size
-      // Map takes up the remaining width and full height
-      mapElement.style.left = targetSidebarWidth + 'px';
-      mapElement.style.top = '0px';
-      mapElement.style.width = `calc(100% - ${targetSidebarWidth}px)`;
-      mapElement.style.height = '100%'; // Full viewport height
-
-      // Invalidate map size after a short delay to ensure layout is stable
-      setTimeout(() => {
-        if (map) {
-            map.invalidateSize();
-        }
-      }, 100); // Increased delay slightly
-    }
-
-    // Run layout adjustment on initial load and on window resize
-    window.addEventListener('load', adjustLayout);
-
-    // Debounce resize event handling
-    let resizeTimer;
-    window.addEventListener('resize', () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(adjustLayout, 150); // Adjust layout shortly after resize stops
-    });
-
-     // Initial adjustment on load
-     adjustLayout();
-
-  </script>
-
 </body>
 </html>
